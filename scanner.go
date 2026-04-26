@@ -95,18 +95,8 @@ func (s *scanner) scanToken() {
 		}
 	case '/':
 		if s.match('*') {
-			for s.peek() != '/' && !s.isAtEnd() {
-				if s.peek() == '\n' {
-					s.line++
-				}
-				s.advance()
-			}
-			if s.isAtEnd() {
-				codeError(s.line, "Unterminated block comment.")
-				return
-			}
-		}
-		if s.match('/') {
+			s.multilineComment()
+		} else if s.match('/') {
 			for s.peek() != '\n' && !s.isAtEnd() {
 				s.advance()
 			}
@@ -186,6 +176,25 @@ func (s *scanner) peekNext() byte {
 		return '\x00'
 	}
 	return s.source[s.current+1]
+}
+
+func (s *scanner) multilineComment() {
+	for !s.isAtEnd() {
+		if s.peek() == '*' && s.peekNext() == '/' {
+			break
+		}
+		if s.peek() == '\n' {
+			s.line++
+		}
+		s.advance()
+	}
+	if s.isAtEnd() {
+		codeError(s.line, "Unterminated block comment.")
+		return
+	}
+	// Consume last block comments and continue
+	s.advance()
+	s.advance()
 }
 
 func (s *scanner) string() {
