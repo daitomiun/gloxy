@@ -180,6 +180,13 @@ func (s *scanner) peekNext() byte {
 
 func (s *scanner) multilineComment() {
 	for !s.isAtEnd() {
+		fmt.Printf("-> '%c' \n", s.peek())
+		if s.peek() == '/' && s.peekNext() == '*' {
+			// Consume inner code blocks
+			s.advance()
+			s.advance()
+			s.multilineComment()
+		}
 		if s.peek() == '*' && s.peekNext() == '/' {
 			break
 		}

@@ -28,9 +28,9 @@ func check(e error) {
 func runFile(path string) {
 	fmt.Println("Run file")
 	fmt.Printf("path: %s \n", path)
-	os.Exit(0)
 	bytes, err := os.ReadFile(path)
 	check(err)
+	fmt.Println(string(bytes))
 	run(string(bytes))
 
 	// Indicate an error in the exit code
