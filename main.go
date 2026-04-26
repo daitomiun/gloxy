@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"strings"
 )
 
 func main() {
@@ -58,16 +57,20 @@ func runPrompt() {
 }
 
 func run(source string) {
-	scanner := bufio.NewScanner(strings.NewReader(source))
-	scanner.Split(bufio.ScanRunes)
+	scanner := scanner{
+		source:  source,
+		tokens:  []Token{},
+		start:   0,
+		current: 0,
+		line:    1,
+	}
 
-	var tokens []string
-	for scanner.Scan() {
-		tokens = append(tokens, scanner.Text())
+	tokens := scanner.scanTokens()
+
+	for i, token := range tokens {
+		fmt.Printf("%d -> %v \n", i, token)
 	}
-	for _, token := range tokens {
-		fmt.Println(token)
-	}
+
 }
 
 var hadError bool

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strconv"
 )
 
@@ -46,6 +47,7 @@ func (s *scanner) isAtEnd() bool { return s.current >= len(s.source) }
 
 func (s *scanner) scanToken() {
 	c := s.advance()
+	fmt.Printf("scanToken -> %c \n", c)
 	switch c {
 	case '(':
 		s.addToken(LEFT_PAREN)
@@ -92,6 +94,18 @@ func (s *scanner) scanToken() {
 			s.addToken(GREATER)
 		}
 	case '/':
+		if s.match('*') {
+			for s.peek() != '/' && !s.isAtEnd() {
+				if s.peek() == '\n' {
+					s.line++
+				}
+				s.advance()
+			}
+			if s.isAtEnd() {
+				codeError(s.line, "Unterminated block comment.")
+				return
+			}
+		}
 		if s.match('/') {
 			for s.peek() != '\n' && !s.isAtEnd() {
 				s.advance()
@@ -110,8 +124,10 @@ func (s *scanner) scanToken() {
 		s.string()
 	default:
 		if s.isDigit(c) {
+			fmt.Println("is digit")
 			s.number()
 		} else if s.isAlpha(c) {
+			fmt.Println("is alpha")
 			s.identifier()
 		} else {
 			codeError(s.line, "Unexpected character.")
@@ -190,6 +206,7 @@ func (s *scanner) string() {
 
 func (s *scanner) advance() byte {
 	ch := s.source[s.current]
+	fmt.Printf("advance char -> %c \n", ch)
 	s.current++
 	return ch
 }
@@ -199,7 +216,8 @@ func (s *scanner) addToken(tokenType TokenType) {
 }
 
 func (s *scanner) addTokenWithLiteral(tokenType TokenType, literal any) {
-	text := s.source
+	text := s.source[s.start:s.current]
+	fmt.Printf("final text: %s tokenType: %s\n", text, tokenType.string())
 	s.tokens = append(s.tokens, Token{Type: tokenType, Lexeme: text, Literal: literal, Line: s.line})
 }
 
@@ -219,6 +237,4 @@ func (s *scanner) peek() byte {
 		return '\x00'
 	}
 	return s.source[s.current]
-
 }
-
