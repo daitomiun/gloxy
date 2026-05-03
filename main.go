@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+
+	"github.com/daitonium/gloxy/ast"
 )
 
 func main() {
@@ -59,7 +61,7 @@ func runPrompt() {
 func run(source string) {
 	scanner := scanner{
 		source:  source,
-		tokens:  []Token{},
+		tokens:  []ast.Token{},
 		start:   0,
 		current: 0,
 		line:    1,

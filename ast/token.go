@@ -1,4 +1,4 @@
-package main
+package ast
 
 import "fmt"
 
@@ -54,6 +54,25 @@ const (
 	EOF
 )
 
+var Keywords = map[string]TokenType{
+	"and":    AND,
+	"class":  CLASS,
+	"else":   ELSE,
+	"false":  FALSE,
+	"for":    FOR,
+	"fun":    FUN,
+	"if":     IF,
+	"nil":    NIL,
+	"or":     OR,
+	"print":  PRINT,
+	"return": RETURN,
+	"super":  SUPER,
+	"this":   THIS,
+	"true":   TRUE,
+	"var":    VAR,
+	"while":  WHILE,
+}
+
 var tokenName = map[TokenType]string{
 	// Single-character tokens.
 	LEFT_PAREN:    "(",
@@ -77,7 +96,7 @@ var tokenName = map[TokenType]string{
 	SLASH:         "/",
 }
 
-func (tt TokenType) string() string {
+func (tt TokenType) String() string {
 	return tokenName[tt]
 }
 
@@ -88,7 +107,7 @@ type Token struct {
 	Line    int
 }
 
-func (t *Token) toString() string {
-	str := fmt.Sprintf("%v %s %d", t.Type.string(), t.Lexeme, t.Literal)
+func (t *Token) ToString() string {
+	str := fmt.Sprintf("%v %s %d", t.Type.String(), t.Lexeme, t.Literal)
 	return str
 }
