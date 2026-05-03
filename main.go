@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/daitonium/gloxy/ast"
+	"github.com/daitonium/gloxy/tool/printer"
 )
 
 func main() {
@@ -69,10 +70,17 @@ func run(source string) {
 
 	tokens := scanner.scanTokens()
 
-	for i, token := range tokens {
-		fmt.Printf("%d -> %v \n", i, token)
+	parser := Parser{
+		tokens:  tokens,
+		current: 0,
+	}
+	expression := parser.Parse()
+
+	if hadError {
+		return
 	}
 
+	fmt.Println(printer.ASTPrint(expression))
 }
 
 var hadError bool
@@ -84,4 +92,12 @@ func codeError(line int, message string) {
 func report(line int, where, message string) {
 	fmt.Printf("[line %v ] Error %s: %s \n", line, where, message)
 	hadError = true
+}
+
+func parseError(token ast.Token, message string) {
+	if token.Type == ast.EOF {
+		report(token.Line, " at end", message)
+	} else {
+		report(token.Line, " at '"+token.Lexeme+"'", message)
+	}
 }

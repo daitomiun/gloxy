@@ -21,7 +21,12 @@ func (s *scanner) scanTokens() []ast.Token {
 		s.scanToken()
 	}
 
-	s.tokens = append(s.tokens, ast.Token{ast.EOF, "", nil, s.line})
+	s.tokens = append(s.tokens, ast.Token{
+		Type:    ast.EOF,
+		Lexeme:  "",
+		Literal: nil,
+		Line:    s.line,
+	})
 	return s.tokens
 }
 
