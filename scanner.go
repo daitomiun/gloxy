@@ -90,6 +90,10 @@ func (s *scanner) scanToken() {
 		} else {
 			s.addToken(ast.SLASH)
 		}
+	case '?':
+		s.addToken(ast.QUESTION)
+	case ':':
+		s.addToken(ast.COLON)
 	case ' ':
 	case '\r':
 	case '\t':

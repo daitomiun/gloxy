@@ -1,6 +1,8 @@
 package main
 
-import "github.com/daitonium/gloxy/ast"
+import (
+	"github.com/daitonium/gloxy/ast"
+)
 
 type Parser struct {
 	tokens  []ast.Token
@@ -12,7 +14,14 @@ func (p *Parser) Parse() ast.Expr {
 }
 
 func (p *Parser) expression() ast.Expr {
-	return p.equality()
+	// if it starts with out a left operand discard and continue parsing
+	if p.match(ast.PLUS, ast.STAR, ast.SLASH, ast.EQUAL_EQUAL, ast.BANG_EQUAL) {
+		token := p.previous()
+		p.error(token, "Binary operator Missing left operand")
+		p.unary()
+		return nil
+	}
+	return p.commaOperator()
 }
 
 func (p *Parser) equality() ast.Expr {
@@ -25,6 +34,51 @@ func (p *Parser) equality() ast.Expr {
 			Left:     expr,
 			Operator: operator,
 			Right:    right,
+		}
+	}
+	return expr
+}
+
+func (p *Parser) commaOperator() ast.Expr {
+	expr := p.assignment()
+
+	for p.match(ast.COMMA) {
+		operator := p.previous()
+		right := p.assignment()
+		expr = ast.Binary{
+			Left:     expr,
+			Operator: operator,
+			Right:    right,
+		}
+	}
+	return expr
+}
+
+func (p *Parser) assignment() ast.Expr {
+	expr := p.conditional()
+
+	if p.match(ast.EQUAL) {
+		operator := p.previous()
+		right := p.assignment()
+		expr = ast.Binary{
+			Left:     expr,
+			Operator: operator,
+			Right:    right,
+		}
+	}
+	return expr
+}
+
+func (p *Parser) conditional() ast.Expr {
+	expr := p.equality()
+	if p.match(ast.QUESTION) {
+		thenBranch := p.assignment()
+		p.consume(ast.COLON, "Expect ':' after ternary condition")
+		elseBranch := p.conditional()
+		return ast.Ternary{
+			Condition: expr,
+			Then:      thenBranch,
+			Else:      elseBranch,
 		}
 	}
 	return expr

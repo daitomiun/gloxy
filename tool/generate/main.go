@@ -17,6 +17,7 @@ func main() {
 	}
 	outputDir := args[0]
 	defineAst(outputDir, "Expr", []string{
+		"Ternary  : Condition Expr, Then Expr, Else Expr",
 		"Binary   : Left Expr, Operator Token, Right Expr",
 		"Grouping : Expression Expr",
 		"Literal  : Value any",
@@ -35,7 +36,7 @@ func defineAst(outputDir, baseName string, types []string) {
 	_, err = fmt.Fprintln(f)
 	check(err)
 	// interface methods implemented here
-	_, err = fmt.Fprintf(f, "type %s interface{}\n", baseName)
+	_, err = fmt.Fprintf(f, "type %s any\n", baseName)
 	check(err)
 
 	// The AST structs

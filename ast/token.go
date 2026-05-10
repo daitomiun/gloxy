@@ -17,6 +17,8 @@ const (
 	SEMICOLON
 	SLASH
 	STAR
+	QUESTION
+	COLON
 
 	// One or two character tokens.
 	BANG
@@ -94,6 +96,8 @@ var tokenName = map[TokenType]string{
 	GREATER:       ">",
 	GREATER_EQUAL: ">=",
 	SLASH:         "/",
+	QUESTION:      "?",
+	COLON:         ":",
 }
 
 func (tt TokenType) String() string {
