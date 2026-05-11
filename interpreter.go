@@ -1,22 +1,45 @@
 package main
 
 import (
+	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/daitonium/gloxy/ast"
-	"golang.org/x/text/cases"
 )
 
-type Interpreter struct{}
+type RuntimeError struct {
+	token ast.Token
+	msg   string
+}
 
-func (i Interpreter) evaluate(e ast.Expr) any {
+func runtimeError(error RuntimeError) {
+	fmt.Println(error.msg + "\n[line " + fmt.Sprint(error.token.Line) + " ]")
+	hadRuntimeError = true
+}
+
+func interpret(expression ast.Expr) {
+	defer func() {
+		if r := recover(); r != nil {
+			if err, ok := r.(RuntimeError); ok {
+				runtimeError(err)
+			} else {
+				panic(r)
+			}
+		}
+	}()
+	value := evaluate(expression)
+	fmt.Println(stringify(value))
+}
+
+func evaluate(e ast.Expr) any {
 	switch t := e.(type) {
 	case ast.Literal:
 		return t.Value
 	case ast.Grouping:
-		return i.evaluate(t.Expression)
+		return evaluate(t.Expression)
 	case ast.Unary:
-		right := i.evaluate(t.Right)
+		right := evaluate(t.Right)
 		switch t.Operator.Type {
 		case ast.MINUS:
 			checkNumOperand(t.Operator, t.Right)
@@ -27,8 +50,8 @@ func (i Interpreter) evaluate(e ast.Expr) any {
 		}
 		return nil
 	case ast.Binary:
-		left := i.evaluate(t.Left)
-		right := i.evaluate(t.Right)
+		left := evaluate(t.Left)
+		right := evaluate(t.Right)
 		switch t.Operator.Type {
 		case ast.BANG_EQUAL:
 			return !isEqual(t.Left, t.Right)
@@ -80,8 +103,8 @@ func (i Interpreter) evaluate(e ast.Expr) any {
 					return leftString + rightString
 				}
 			}
-			// Return or generate error check this later
-			break
+			// NOTE: panic and recover later
+			panic(RuntimeError{token: t.Operator, msg: "Operands must be two numbers or two strings"})
 		default:
 			return nil
 		}
@@ -93,7 +116,8 @@ func checkNumOperand(operator ast.Token, operand ast.Expr) {
 	if _, ok := operand.(float64); ok {
 		return
 	}
-	// Return or handle error
+	// NOTE: panic and recover the internal recursive tree
+	panic(RuntimeError{token: operator, msg: "Operands must be a number."})
 }
 func checkNumOperands(operator ast.Token, left, right ast.Expr) {
 	if _, ok := left.(float64); ok {
@@ -101,10 +125,7 @@ func checkNumOperands(operator ast.Token, left, right ast.Expr) {
 			return
 		}
 	}
-	// Return or handle error
-}
-
-func RuntimeError(token ast.Token, message string) {
+	panic(RuntimeError{token: operator, msg: "Operands must be numbers."})
 }
 
 func isEqual(a ast.Expr, b ast.Expr) bool {
@@ -126,4 +147,19 @@ func isTruthy(e ast.Expr) bool {
 		return val
 	}
 	return true
+}
+
+func stringify(object any) string {
+	if object == nil {
+		return "nil"
+	}
+	if val, ok := object.(float64); ok {
+		text := fmt.Sprintf("%v", val)
+		if newText, found := strings.CutSuffix(text, ".0"); found {
+			text = newText
+		}
+		return text
+	}
+	return fmt.Sprintf("%v", object)
+
 }

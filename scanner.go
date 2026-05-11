@@ -34,7 +34,6 @@ func (s *scanner) isAtEnd() bool { return s.current >= len(s.source) }
 
 func (s *scanner) scanToken() {
 	c := s.advance()
-	fmt.Printf("scanToken -> %c \n", c)
 	switch c {
 	case '(':
 		s.addToken(ast.LEFT_PAREN)
@@ -105,10 +104,8 @@ func (s *scanner) scanToken() {
 		s.string()
 	default:
 		if s.isDigit(c) {
-			fmt.Println("is digit")
 			s.number()
 		} else if s.isAlpha(c) {
-			fmt.Println("is alpha")
 			s.identifier()
 		} else {
 			codeError(s.line, "Unexpected character.")
@@ -171,7 +168,6 @@ func (s *scanner) peekNext() byte {
 
 func (s *scanner) multilineComment() {
 	for !s.isAtEnd() {
-		fmt.Printf("-> '%c' \n", s.peek())
 		if s.peek() == '/' && s.peekNext() == '*' {
 			// Consume inner code blocks
 			s.advance()
@@ -213,7 +209,6 @@ func (s *scanner) string() {
 
 func (s *scanner) advance() byte {
 	ch := s.source[s.current]
-	fmt.Printf("advance char -> %c \n", ch)
 	s.current++
 	return ch
 }

@@ -6,8 +6,10 @@ import (
 	"os"
 
 	"github.com/daitonium/gloxy/ast"
-	"github.com/daitonium/gloxy/tool/printer"
 )
+
+var hadError bool
+var hadRuntimeError bool
 
 func main() {
 	args := os.Args[1:]
@@ -39,6 +41,9 @@ func runFile(path string) {
 	// Indicate an error in the exit code
 	if hadError {
 		os.Exit(65)
+	}
+	if hadRuntimeError {
+		os.Exit(70)
 	}
 }
 
@@ -80,10 +85,8 @@ func run(source string) {
 		return
 	}
 
-	fmt.Println(printer.ASTPrint(expression))
+	interpret(expression)
 }
-
-var hadError bool
 
 func codeError(line int, message string) {
 	report(line, "", message)
