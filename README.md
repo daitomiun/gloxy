@@ -1,7 +1,7 @@
 # Gloxy: The lox programming language in go
+The go implementation of the `Lox` language
 
-
-## Run the compiler
+## Build the compiler
 
 ```bash
 go run .
