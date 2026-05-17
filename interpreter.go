@@ -58,41 +58,42 @@ func evaluate(e ast.Expr) any {
 		case ast.EQUAL_EQUAL:
 			return isEqual(t.Left, t.Right)
 		case ast.GREATER:
-			checkNumOperands(t.Operator, t.Left, t.Right)
+			checkNumOperands(t.Operator, left, right)
 			leftValue := left.(float64)
 			rigthValue := right.(float64)
 			return leftValue > rigthValue
 		case ast.GREATER_EQUAL:
-			checkNumOperands(t.Operator, t.Left, t.Right)
+			checkNumOperands(t.Operator, left, right)
 			leftValue := left.(float64)
 			rigthValue := right.(float64)
 			return leftValue >= rigthValue
 		case ast.LESS:
-			checkNumOperands(t.Operator, t.Left, t.Right)
+			checkNumOperands(t.Operator, left, right)
 			leftValue := left.(float64)
 			rigthValue := right.(float64)
 			return leftValue < rigthValue
 		case ast.LESS_EQUAL:
-			checkNumOperands(t.Operator, t.Left, t.Right)
+			checkNumOperands(t.Operator, left, right)
 			leftValue := left.(float64)
 			rigthValue := right.(float64)
 			return leftValue <= rigthValue
 		case ast.MINUS:
-			checkNumOperands(t.Operator, t.Left, t.Right)
+			checkNumOperands(t.Operator, left, right)
 			leftValue := left.(float64)
 			rigthValue := right.(float64)
 			return leftValue - rigthValue
 		case ast.SLASH:
-			checkNumOperands(t.Operator, t.Left, t.Right)
+			checkNumOperands(t.Operator, left, right)
 			leftValue := left.(float64)
 			rigthValue := right.(float64)
 			return leftValue / rigthValue
 		case ast.STAR:
-			checkNumOperands(t.Operator, t.Left, t.Right)
+			checkNumOperands(t.Operator, left, right)
 			leftValue := left.(float64)
 			rigthValue := right.(float64)
 			return leftValue * rigthValue
 		case ast.PLUS:
+			checkNumOperands(t.Operator, left, right)
 			if leftFloat, ok := left.(float64); ok {
 				if rightFloat, ok := right.(float64); ok {
 					return leftFloat + rightFloat
@@ -119,12 +120,14 @@ func checkNumOperand(operator ast.Token, operand ast.Expr) {
 	// NOTE: panic and recover the internal recursive tree
 	panic(RuntimeError{token: operator, msg: "Operands must be a number."})
 }
+
 func checkNumOperands(operator ast.Token, left, right ast.Expr) {
 	if _, ok := left.(float64); ok {
 		if _, ok := right.(float64); ok {
 			return
 		}
 	}
+	fmt.Println("Not okay")
 	panic(RuntimeError{token: operator, msg: "Operands must be numbers."})
 }
 
