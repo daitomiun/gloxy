@@ -93,6 +93,18 @@ func evaluate(e ast.Expr) any {
 			rigthValue := right.(float64)
 			return leftValue * rigthValue
 		case ast.PLUS:
+			// Check mixed operands
+			if leftString, ok := left.(string); ok {
+				if rightFloat, ok := right.(float64); ok {
+					return fmt.Sprint(leftString, rightFloat)
+				}
+			}
+			if leftFloat, ok := left.(float64); ok {
+				if righString, ok := right.(string); ok {
+					return fmt.Sprint(leftFloat, righString)
+				}
+			}
+			// Check non mixed operands
 			checkNumOperands(t.Operator, left, right)
 			if leftFloat, ok := left.(float64); ok {
 				if rightFloat, ok := right.(float64); ok {
@@ -104,6 +116,7 @@ func evaluate(e ast.Expr) any {
 					return leftString + rightString
 				}
 			}
+
 			// NOTE: panic and recover later
 			panic(RuntimeError{token: t.Operator, msg: "Operands must be two numbers or two strings"})
 		default:
@@ -127,7 +140,6 @@ func checkNumOperands(operator ast.Token, left, right ast.Expr) {
 			return
 		}
 	}
-	fmt.Println("Not okay")
 	panic(RuntimeError{token: operator, msg: "Operands must be numbers."})
 }
 
