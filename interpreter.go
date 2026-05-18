@@ -83,6 +83,7 @@ func evaluate(e ast.Expr) any {
 			rigthValue := right.(float64)
 			return leftValue - rigthValue
 		case ast.SLASH:
+			checkDivisionByZero(t.Operator, left, right)
 			checkNumOperands(t.Operator, left, right)
 			leftValue := left.(float64)
 			rigthValue := right.(float64)
@@ -141,6 +142,22 @@ func checkNumOperands(operator ast.Token, left, right ast.Expr) {
 		}
 	}
 	panic(RuntimeError{token: operator, msg: "Operands must be numbers."})
+}
+
+func checkDivisionByZero(operator ast.Token, left, right ast.Expr) {
+	if leftNum, _ := left.(float64); leftNum == 0 {
+		if rightNum, _ := right.(float64); rightNum == 0 {
+			panic(RuntimeError{token: operator, msg: "NaN"})
+		}
+		panic(RuntimeError{token: operator, msg: "-Inf"})
+	}
+	if rightNum, _ := right.(float64); rightNum == 0 {
+		if leftNum, _ := left.(float64); leftNum == 0 {
+			panic(RuntimeError{token: operator, msg: "NaN"})
+		}
+		panic(RuntimeError{token: operator, msg: "+Inf"})
+	}
+	panic(RuntimeError{token: operator, msg: "Cannot divide by zero"})
 }
 
 func isEqual(a ast.Expr, b ast.Expr) bool {

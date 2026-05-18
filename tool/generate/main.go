@@ -20,7 +20,7 @@ func main() {
 		"Ternary  : Condition Expr, Then Expr, Else Expr",
 		"Binary   : Left Expr, Operator Token, Right Expr",
 		"Grouping : Expression Expr",
-		"Literal  : Value any",
+		"Literal  : Value Expr",
 		"Unary    : Operator Token, Right Expr",
 	})
 }
@@ -46,34 +46,7 @@ func defineAst(outputDir, baseName string, types []string) {
 		defineType(f, structName, fields)
 	}
 
-	// evaluator function
-	defineEvaluator(f, baseName, types)
-
 	fmt.Println("Done")
-}
-
-func defineEvaluator(w io.Writer, baseName string, types []string) {
-	_, err := fmt.Fprintf(w, "func Evaluate(e %s) any {\n", baseName)
-
-	_, err = fmt.Fprintln(w, "	switch t := e.(type) {")
-	check(err)
-	// case evaluators are implemented here
-	for _, t := range types {
-		typeName := strings.TrimSpace(strings.Split(t, ":")[0])
-		_, err = fmt.Fprintf(w, "		case %s:\n", typeName)
-		check(err)
-		_, err = fmt.Fprintln(w, "			return t")
-		check(err)
-	}
-	_, err = fmt.Fprintln(w, "		default:")
-	check(err)
-	_, err = fmt.Fprintln(w, `			return nil`)
-	check(err)
-
-	_, err = fmt.Fprintln(w, "	}")
-	check(err)
-	_, err = fmt.Fprintln(w, "}")
-	check(err)
 }
 
 func defineType(w io.Writer, structName, fieldList string) {
