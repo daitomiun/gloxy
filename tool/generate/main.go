@@ -23,6 +23,10 @@ func main() {
 		"Literal  : Value Expr",
 		"Unary    : Operator Token, Right Expr",
 	})
+	defineAst(outputDir, "Stmt", []string{
+		"ExpressionStmt : Expression Expr",
+		"PrintStmt      : Expression Expr",
+	})
 }
 
 func defineAst(outputDir, baseName string, types []string) {

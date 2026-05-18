@@ -18,7 +18,7 @@ func runtimeError(error RuntimeError) {
 	hadRuntimeError = true
 }
 
-func interpret(expression ast.Expr) {
+func interpret(statements []ast.Stmt) {
 	defer func() {
 		if r := recover(); r != nil {
 			if err, ok := r.(RuntimeError); ok {
@@ -28,8 +28,28 @@ func interpret(expression ast.Expr) {
 			}
 		}
 	}()
-	value := evaluate(expression)
-	fmt.Println(stringify(value))
+	for _, statement := range statements {
+		fmt.Println(statement)
+		execute(statement)
+	}
+}
+
+func execute(stmt ast.Stmt) {
+	evaluateStmt(stmt)
+}
+
+func evaluateStmt(stmt ast.Stmt) {
+	switch t := stmt.(type) {
+	case ast.ExpressionStmt:
+		fmt.Println("expression")
+		evaluate(t.Expression)
+	case ast.PrintStmt:
+		fmt.Println("print!")
+		value := evaluate(t.Expression)
+		fmt.Println(stringify(value))
+	default:
+		return
+	}
 }
 
 func evaluate(e ast.Expr) any {

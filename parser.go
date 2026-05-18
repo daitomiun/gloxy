@@ -9,8 +9,32 @@ type Parser struct {
 	current int
 }
 
-func (p *Parser) Parse() ast.Expr {
-	return p.expression()
+func (p *Parser) Parse() []ast.Stmt {
+	statements := []ast.Stmt{}
+	for !p.isAtEnd() {
+		statements = append(statements, p.statement())
+	}
+
+	return statements
+}
+
+func (p *Parser) statement() ast.Stmt {
+	if p.match(ast.PRINT) {
+		return p.printStatement()
+	}
+	return p.expressionStatement()
+}
+
+func (p *Parser) printStatement() ast.Stmt {
+	value := p.expression()
+	p.consume(ast.SEMICOLON, "Expect ';' after value.")
+	return ast.PrintStmt{Expression: value}
+}
+
+func (p *Parser) expressionStatement() ast.Stmt {
+	expr := p.expression()
+	p.consume(ast.SEMICOLON, "Expect ';' after expression.")
+	return ast.ExpressionStmt{Expression: expr}
 }
 
 func (p *Parser) expression() ast.Expr {
