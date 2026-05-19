@@ -98,6 +98,8 @@ var tokenName = map[TokenType]string{
 	SLASH:         "/",
 	QUESTION:      "?",
 	COLON:         ":",
+	NUMBER:        "number",
+	EOF:           "EOF",
 }
 
 func (tt TokenType) String() string {

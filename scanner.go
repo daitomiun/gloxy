@@ -27,6 +27,7 @@ func (s *scanner) scanTokens() []ast.Token {
 		Literal: nil,
 		Line:    s.line,
 	})
+
 	return s.tokens
 }
 

@@ -99,7 +99,7 @@ func report(line int, where, message string) {
 
 func parseError(token ast.Token, message string) {
 	if token.Type == ast.EOF {
-		report(token.Line, " at end", message)
+		report(token.Line, "at end", message)
 		return
 	} else {
 		report(token.Line, " at '"+token.Lexeme+"'", message)

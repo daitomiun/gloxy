@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/daitonium/gloxy/ast"
 )
 
@@ -10,6 +12,13 @@ type Parser struct {
 }
 
 func (p *Parser) Parse() []ast.Stmt {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("err to parse")
+			p.synchronize()
+			return
+		}
+	}()
 	statements := []ast.Stmt{}
 	for !p.isAtEnd() {
 		statements = append(statements, p.statement())
@@ -229,6 +238,7 @@ func (p *Parser) consume(t ast.TokenType, message string) ast.Expr {
 
 func (p *Parser) error(token ast.Token, message string) {
 	parseError(token, message)
+	panic("failed")
 }
 
 func (p *Parser) synchronize() {
