@@ -19,3 +19,5 @@ go build .
 Because it's fun. duh...
 
 I wanted to learn how interpreters and compilers works so this is the way to do it! 
+
+## Motivation
