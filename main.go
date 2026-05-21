@@ -36,7 +36,8 @@ func runFile(path string) {
 	bytes, err := os.ReadFile(path)
 	check(err)
 	fmt.Println(string(bytes))
-	run(string(bytes))
+	interpreter := NewInterpreter()
+	run(string(bytes), interpreter)
 
 	// Indicate an error in the exit code
 	if hadError {
@@ -51,6 +52,7 @@ func runPrompt() {
 	fmt.Println("Run prompt")
 	reader := bufio.NewScanner(os.Stdin)
 
+	interpreter := NewInterpreter()
 	for true {
 		fmt.Print("> ")
 		reader.Scan()
@@ -58,13 +60,13 @@ func runPrompt() {
 		if len(line) == 0 {
 			continue
 		}
-		run(line)
+		run(line, interpreter)
 		hadError = false
 
 	}
 }
 
-func run(source string) {
+func run(source string, i *Interpreter) {
 	scanner := scanner{
 		source:  source,
 		tokens:  []ast.Token{},
@@ -84,8 +86,7 @@ func run(source string) {
 	if hadError {
 		return
 	}
-
-	interpret(statements)
+	i.interpret(statements)
 }
 
 func codeError(line int, message string) {

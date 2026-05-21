@@ -42,7 +42,7 @@ func (p *Parser) varDeclaration() ast.Stmt {
 	}
 
 	p.consume(ast.SEMICOLON, "Expect ';' after variable declaration.")
-	return ast.Var{Name: name, Initializer: initializer}
+	return ast.VarStmt{Name: name, Initializer: initializer}
 }
 
 func (p *Parser) statement() ast.Stmt {
@@ -237,6 +237,7 @@ func (p *Parser) primary() ast.Expr {
 		return ast.Literal{Value: p.previous().Literal}
 	}
 	if p.match(ast.IDENTIFIER) {
+		fmt.Println("240 identifier -> %v", p.previous())
 		return ast.Variable{Name: p.previous()}
 	}
 	if p.match(ast.LEFT_PAREN) {

@@ -14,7 +14,15 @@ type RuntimeError struct {
 }
 
 type Interpreter struct {
-	environment Environment
+	environment *Environment
+}
+
+func NewInterpreter() *Interpreter {
+	return &Interpreter{
+		environment: &Environment{
+			Values: make(map[string]any),
+		},
+	}
 }
 
 func runtimeError(error RuntimeError) {
@@ -22,7 +30,7 @@ func runtimeError(error RuntimeError) {
 	hadRuntimeError = true
 }
 
-func interpret(statements []ast.Stmt) {
+func (i *Interpreter) interpret(statements []ast.Stmt) {
 	defer func() {
 		if r := recover(); r != nil {
 			if err, ok := r.(RuntimeError); ok {
@@ -33,17 +41,16 @@ func interpret(statements []ast.Stmt) {
 		}
 	}()
 	for _, statement := range statements {
-		fmt.Println(statement)
-		execute(statement)
+		fmt.Printf("statement -> %v\n", statement)
+		i.execute(statement)
 	}
 }
 
-func execute(stmt ast.Stmt) {
-	interpreter := Interpreter{}
-	interpreter.evaluateStmt(stmt)
+func (i *Interpreter) execute(stmt ast.Stmt) {
+	i.evaluateStmt(stmt)
 }
 
-func (i Interpreter) evaluateStmt(stmt ast.Stmt) {
+func (i *Interpreter) evaluateStmt(stmt ast.Stmt) {
 	switch t := stmt.(type) {
 	case ast.ExpressionStmt:
 		fmt.Println("expression")
@@ -52,18 +59,21 @@ func (i Interpreter) evaluateStmt(stmt ast.Stmt) {
 		fmt.Println("print!")
 		value := i.evaluate(t.Expression)
 		fmt.Println(stringify(value))
-	case ast.Var:
+	case ast.VarStmt:
+		fmt.Println("var information")
 		var value any
 		if t.Initializer != nil {
 			value = i.evaluate(t.Initializer)
 		}
+		fmt.Printf("lexeme -> %s \n", t.Name.Lexeme)
 		i.environment.Define(t.Name.Lexeme, value)
 	default:
 		return
 	}
 }
 
-func (i Interpreter) evaluate(e ast.Expr) any {
+func (i *Interpreter) evaluate(e ast.Expr) any {
+	fmt.Printf("Expr -> %T \n", e)
 	switch t := e.(type) {
 	case ast.Literal:
 		return t.Value
@@ -80,6 +90,9 @@ func (i Interpreter) evaluate(e ast.Expr) any {
 			return !isTruthy(t.Right)
 		}
 		return nil
+	case ast.Variable:
+		fmt.Printf("variable values -> %v \n", i.environment.Values)
+		return i.environment.Get(t.Name)
 	case ast.Binary:
 		left := i.evaluate(t.Left)
 		right := i.evaluate(t.Right)
