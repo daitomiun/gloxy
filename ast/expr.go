@@ -21,3 +21,6 @@ type Unary struct {
 	Operator Token
 	Right Expr
 }
+type Variable struct {
+	Name Token
+}

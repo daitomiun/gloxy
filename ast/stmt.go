@@ -7,3 +7,10 @@ type ExpressionStmt struct {
 type PrintStmt struct {
 	Expression Expr
 }
+type Print struct {
+	Expression Expr
+}
+type Var struct {
+	Name Token
+	Initializer Expr
+}

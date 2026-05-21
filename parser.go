@@ -21,10 +21,28 @@ func (p *Parser) Parse() []ast.Stmt {
 	}()
 	statements := []ast.Stmt{}
 	for !p.isAtEnd() {
-		statements = append(statements, p.statement())
+		statements = append(statements, p.declaration())
 	}
 
 	return statements
+}
+
+func (p *Parser) declaration() ast.Stmt {
+	if p.match(ast.VAR) {
+		return p.varDeclaration()
+	}
+	return p.statement()
+}
+
+func (p *Parser) varDeclaration() ast.Stmt {
+	name := p.consume(ast.IDENTIFIER, "Expect variable name.")
+	var initializer ast.Expr
+	if p.match(ast.EQUAL) {
+		initializer = p.expression()
+	}
+
+	p.consume(ast.SEMICOLON, "Expect ';' after variable declaration.")
+	return ast.Var{Name: name, Initializer: initializer}
 }
 
 func (p *Parser) statement() ast.Stmt {
@@ -218,6 +236,9 @@ func (p *Parser) primary() ast.Expr {
 	if p.match(ast.NUMBER, ast.STRING) {
 		return ast.Literal{Value: p.previous().Literal}
 	}
+	if p.match(ast.IDENTIFIER) {
+		return ast.Variable{Name: p.previous()}
+	}
 	if p.match(ast.LEFT_PAREN) {
 		expr := p.expression()
 		p.consume(ast.RIGHT_PAREN, "Expect ')' after expression.")
@@ -228,12 +249,12 @@ func (p *Parser) primary() ast.Expr {
 	return nil
 }
 
-func (p *Parser) consume(t ast.TokenType, message string) ast.Expr {
+func (p *Parser) consume(t ast.TokenType, message string) ast.Token {
 	if p.checkType(t) {
 		return p.advance()
 	}
 	p.error(p.peek(), message)
-	return nil
+	return ast.Token{}
 }
 
 func (p *Parser) error(token ast.Token, message string) {

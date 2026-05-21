@@ -13,6 +13,10 @@ type RuntimeError struct {
 	msg   string
 }
 
+type Interpreter struct {
+	environment Environment
+}
+
 func runtimeError(error RuntimeError) {
 	fmt.Println(error.msg + "\n[line " + fmt.Sprint(error.token.Line) + " ]")
 	hadRuntimeError = true
@@ -35,31 +39,38 @@ func interpret(statements []ast.Stmt) {
 }
 
 func execute(stmt ast.Stmt) {
-	evaluateStmt(stmt)
+	interpreter := Interpreter{}
+	interpreter.evaluateStmt(stmt)
 }
 
-func evaluateStmt(stmt ast.Stmt) {
+func (i Interpreter) evaluateStmt(stmt ast.Stmt) {
 	switch t := stmt.(type) {
 	case ast.ExpressionStmt:
 		fmt.Println("expression")
-		evaluate(t.Expression)
+		i.evaluate(t.Expression)
 	case ast.PrintStmt:
 		fmt.Println("print!")
-		value := evaluate(t.Expression)
+		value := i.evaluate(t.Expression)
 		fmt.Println(stringify(value))
+	case ast.Var:
+		var value any
+		if t.Initializer != nil {
+			value = i.evaluate(t.Initializer)
+		}
+		i.environment.Define(t.Name.Lexeme, value)
 	default:
 		return
 	}
 }
 
-func evaluate(e ast.Expr) any {
+func (i Interpreter) evaluate(e ast.Expr) any {
 	switch t := e.(type) {
 	case ast.Literal:
 		return t.Value
 	case ast.Grouping:
-		return evaluate(t.Expression)
+		return i.evaluate(t.Expression)
 	case ast.Unary:
-		right := evaluate(t.Right)
+		right := i.evaluate(t.Right)
 		switch t.Operator.Type {
 		case ast.MINUS:
 			checkNumOperand(t.Operator, t.Right)
@@ -70,8 +81,8 @@ func evaluate(e ast.Expr) any {
 		}
 		return nil
 	case ast.Binary:
-		left := evaluate(t.Left)
-		right := evaluate(t.Right)
+		left := i.evaluate(t.Left)
+		right := i.evaluate(t.Right)
 		switch t.Operator.Type {
 		case ast.BANG_EQUAL:
 			return !isEqual(t.Left, t.Right)
