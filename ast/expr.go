@@ -6,6 +6,10 @@ type Ternary struct {
 	Then Expr
 	Else Expr
 }
+type Assign struct {
+	name Token
+	value Expr
+}
 type Binary struct {
 	Left Expr
 	Operator Token

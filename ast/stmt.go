@@ -8,6 +8,6 @@ type PrintStmt struct {
 	Expression Expr
 }
 type VarStmt struct {
-	Name        Token
+	Name Token
 	Initializer Expr
 }
