@@ -7,12 +7,22 @@ The go implementation of the `Lox` language
 go run .
 ```
 
-Or compmile it's binary
+Or compile it's binary
 
 ```bash
 go build .
 ```
 
+## Regenerate statements and expressions
+
+To generate the `expr.go` and `stmt.go` files under the `ast` package: 
+
+1. Define the new expression under `too/generate/main.go`
+
+2. Run the tool
+```bash
+go run ./tool/generate/main.go ./ast
+```
 
 ## Why a Language interpreter?
 

@@ -75,6 +75,19 @@ func (i *Interpreter) evaluateStmt(stmt ast.Stmt) {
 func (i *Interpreter) evaluate(e ast.Expr) any {
 	fmt.Printf("Expr -> %T \n", e)
 	switch t := e.(type) {
+	case ast.Ternary:
+		condition := i.evaluate(t.Condition)
+		eval, ok := condition.(bool)
+		if !ok {
+			panic(RuntimeError{token: ast.Token{}, msg: "Condition result must be a boolean."})
+		}
+
+		switch eval {
+		case true:
+			return i.evaluate(t.Then)
+		case false:
+			return i.evaluate(t.Else)
+		}
 	case ast.Literal:
 		return t.Value
 	case ast.Grouping:
