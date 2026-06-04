@@ -7,8 +7,8 @@ type Ternary struct {
 	Else Expr
 }
 type Assign struct {
-	name Token
-	value Expr
+	Name Token
+	Value Expr
 }
 type Binary struct {
 	Left Expr

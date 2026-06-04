@@ -1,6 +1,9 @@
 package ast
 
 type Stmt any
+type BlockStmt struct {
+	Statements []Stmt
+}
 type ExpressionStmt struct {
 	Expression Expr
 }

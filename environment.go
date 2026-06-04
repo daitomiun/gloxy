@@ -7,7 +7,8 @@ import (
 )
 
 type Environment struct {
-	Values map[string]any
+	Enclosing *Environment
+	Values    map[string]any
 }
 
 func (e *Environment) Define(name string, value any) {
@@ -21,12 +22,32 @@ func (e *Environment) Get(name ast.Token) any {
 	val, ok := e.Values[name.Lexeme]
 	fmt.Printf("values -> %s \n", e.Values)
 	fmt.Printf("val -> %s \n", val)
-	if ok {
-		fmt.Println("val found")
-		return val
+	if !ok {
+		panic(RuntimeError{
+			token: name,
+			msg:   "Undefined variable '" + name.Lexeme + "'.",
+		})
+	}
+	if e.Enclosing != nil {
+		return e.Enclosing.Get(name)
+	}
+	fmt.Println("val found")
+	return val
+
+}
+
+func (e *Environment) Assign(name ast.Token, value any) {
+	if _, ok := e.Values[name.Lexeme]; ok {
+		e.Values[name.Lexeme] = value
+		return
+	}
+	if e.Enclosing != nil {
+		e.Enclosing.Assign(name, value)
+		return
 	}
 	panic(RuntimeError{
 		token: name,
 		msg:   "Undefined variable '" + name.Lexeme + "'.",
 	})
+
 }

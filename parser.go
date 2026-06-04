@@ -49,7 +49,21 @@ func (p *Parser) statement() ast.Stmt {
 	if p.match(ast.PRINT) {
 		return p.printStatement()
 	}
+	if p.match(ast.LEFT_BRACE) {
+		return ast.BlockStmt{
+			Statements: p.block(),
+		}
+	}
 	return p.expressionStatement()
+}
+
+func (p *Parser) block() []ast.Stmt {
+	var statements []ast.Stmt
+	for !p.checkType(ast.RIGHT_BRACE) && !p.isAtEnd() {
+		statements = append(statements, p.declaration())
+	}
+	p.consume(ast.RIGHT_BRACE, "Expect '}' after block.")
+	return statements
 }
 
 func (p *Parser) printStatement() ast.Stmt {
@@ -109,13 +123,16 @@ func (p *Parser) assignment() ast.Expr {
 	expr := p.conditional()
 
 	if p.match(ast.EQUAL) {
-		operator := p.previous()
-		right := p.assignment()
-		expr = ast.Binary{
-			Left:     expr,
-			Operator: operator,
-			Right:    right,
+		equals := p.previous()
+		value := p.assignment()
+		if eval, ok := value.(ast.Variable); ok {
+			name := eval.Name
+			return ast.Assign{
+				Name:  name,
+				Value: value,
+			}
 		}
+		p.error(equals, "Invalid assignment target.")
 	}
 	return expr
 }

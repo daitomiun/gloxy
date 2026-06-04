@@ -18,7 +18,7 @@ func main() {
 	outputDir := args[0]
 	defineAst(outputDir, "Expr", []string{
 		"Ternary  : Condition Expr, Then Expr, Else Expr",
-		"Assign   : name Token, value Expr",
+		"Assign   : Name Token, Value Expr",
 		"Binary   : Left Expr, Operator Token, Right Expr",
 		"Grouping : Expression Expr",
 		"Literal  : Value Expr",
@@ -26,9 +26,10 @@ func main() {
 		"Variable : Name Token",
 	})
 	defineAst(outputDir, "Stmt", []string{
+		"BlockStmt      : Statements []Stmt",
 		"ExpressionStmt : Expression Expr",
 		"PrintStmt      : Expression Expr",
-		"VarStmt            : Name Token, Initializer Expr",
+		"VarStmt        : Name Token, Initializer Expr",
 	})
 }
 

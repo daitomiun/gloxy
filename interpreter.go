@@ -53,20 +53,20 @@ func (i *Interpreter) execute(stmt ast.Stmt) {
 func (i *Interpreter) evaluateStmt(stmt ast.Stmt) {
 	switch t := stmt.(type) {
 	case ast.ExpressionStmt:
-		fmt.Println("expression")
 		i.evaluate(t.Expression)
 	case ast.PrintStmt:
-		fmt.Println("print!")
 		value := i.evaluate(t.Expression)
 		fmt.Println(stringify(value))
 	case ast.VarStmt:
-		fmt.Println("var information")
 		var value any
 		if t.Initializer != nil {
 			value = i.evaluate(t.Initializer)
 		}
 		fmt.Printf("lexeme -> %s \n", t.Name.Lexeme)
 		i.environment.Define(t.Name.Lexeme, value)
+	case ast.Assign:
+		value := i.evaluate(t.Value)
+		i.environment.Assign(t.Name, value)
 	default:
 		return
 	}
@@ -79,7 +79,7 @@ func (i *Interpreter) evaluate(e ast.Expr) any {
 		condition := i.evaluate(t.Condition)
 		eval, ok := condition.(bool)
 		if !ok {
-			panic(RuntimeError{token: ast.Token{}, msg: "Condition result must be a boolean."})
+			panic(RuntimeError{token: ast.Token{}, msg: "Condition expression must be a boolean."})
 		}
 
 		switch eval {
