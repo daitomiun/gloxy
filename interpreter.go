@@ -50,7 +50,7 @@ func (i *Interpreter) execute(stmt ast.Stmt) {
 }
 
 func (i *Interpreter) evaluateStmt(stmt ast.Stmt) {
-	fmt.Println("--evaluate statement--")
+	//fmt.Println("--evaluate statement--")
 	switch t := stmt.(type) {
 	case ast.ExpressionStmt:
 		i.evaluate(t.Expression)
@@ -74,6 +74,10 @@ func (i *Interpreter) evaluateStmt(stmt ast.Stmt) {
 		} else if t.ElseBranch != nil {
 			i.execute(t.ElseBranch)
 		}
+	case ast.WhileStmt:
+		for isTruthy(i.evaluate(t.Condition)) {
+			i.execute(t.Body)
+		}
 	default:
 		return
 	}
@@ -91,7 +95,7 @@ func (i *Interpreter) executeBlock(statements []ast.Stmt, environment *Environme
 }
 
 func (i *Interpreter) evaluate(e ast.Expr) any {
-	fmt.Println("--evaluate--")
+	//	fmt.Println("--evaluate--")
 	switch t := e.(type) {
 	case ast.Ternary:
 		condition := i.evaluate(t.Condition)
@@ -108,6 +112,18 @@ func (i *Interpreter) evaluate(e ast.Expr) any {
 		}
 	case ast.Literal:
 		return t.Value
+	case ast.Logical:
+		left := i.evaluate(t.Left)
+		if t.Operator.Type == ast.OR {
+			if isTruthy(left) {
+				return left
+			}
+		} else {
+			if !isTruthy(left) {
+				return left
+			}
+		}
+		return i.evaluate(t.Right)
 	case ast.Grouping:
 		return i.evaluate(t.Expression)
 	case ast.Unary:
@@ -124,7 +140,7 @@ func (i *Interpreter) evaluate(e ast.Expr) any {
 	case ast.Variable:
 		return i.environment.Get(t.Name)
 	case ast.Assign:
-		fmt.Printf("assign -> %v \n", t)
+		//		fmt.Printf("assign -> %v \n", t)
 		value := i.evaluate(t.Value)
 		i.environment.Assign(t.Name, value)
 		return value

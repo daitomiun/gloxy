@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	//	"fmt"
 	"github.com/daitonium/gloxy/ast"
 	"strconv"
 )
@@ -220,7 +220,7 @@ func (s *scanner) addToken(tokenType ast.TokenType) {
 
 func (s *scanner) addTokenWithLiteral(tokenType ast.TokenType, literal any) {
 	text := s.source[s.start:s.current]
-	fmt.Printf("final text: %s tokenType: %s\n", text, tokenType.String())
+	//	fmt.Printf("final text: %s tokenType: %s\n", text, tokenType.String())
 	s.tokens = append(s.tokens, ast.Token{Type: tokenType, Lexeme: text, Literal: literal, Line: s.line})
 }
 

@@ -3,17 +3,17 @@ package ast
 type Expr any
 type Ternary struct {
 	Condition Expr
-	Then      Expr
-	Else      Expr
+	Then Expr
+	Else Expr
 }
 type Assign struct {
-	Name  Token
+	Name Token
 	Value Expr
 }
 type Binary struct {
-	Left     Expr
+	Left Expr
 	Operator Token
-	Right    Expr
+	Right Expr
 }
 type Grouping struct {
 	Expression Expr
@@ -23,8 +23,13 @@ type Literal struct {
 }
 type Unary struct {
 	Operator Token
-	Right    Expr
+	Right Expr
 }
 type Variable struct {
 	Name Token
+}
+type Logical struct {
+	Left Expr
+	Operator Token
+	Right Expr
 }
