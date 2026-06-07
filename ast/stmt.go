@@ -11,6 +11,11 @@ type PrintStmt struct {
 	Expression Expr
 }
 type VarStmt struct {
-	Name Token
+	Name        Token
 	Initializer Expr
+}
+type IfStmt struct {
+	Condition  Expr
+	ThenBranch Stmt
+	ElseBranch Stmt
 }

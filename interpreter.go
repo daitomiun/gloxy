@@ -41,7 +41,6 @@ func (i *Interpreter) interpret(statements []ast.Stmt) {
 		}
 	}()
 	for _, statement := range statements {
-		fmt.Printf("statement -> %v\n", statement)
 		i.execute(statement)
 	}
 }
@@ -51,6 +50,7 @@ func (i *Interpreter) execute(stmt ast.Stmt) {
 }
 
 func (i *Interpreter) evaluateStmt(stmt ast.Stmt) {
+	fmt.Println("--evaluate statement--")
 	switch t := stmt.(type) {
 	case ast.ExpressionStmt:
 		i.evaluate(t.Expression)
@@ -62,18 +62,36 @@ func (i *Interpreter) evaluateStmt(stmt ast.Stmt) {
 		if t.Initializer != nil {
 			value = i.evaluate(t.Initializer)
 		}
-		fmt.Printf("lexeme -> %s \n", t.Name.Lexeme)
 		i.environment.Define(t.Name.Lexeme, value)
-	case ast.Assign:
-		value := i.evaluate(t.Value)
-		i.environment.Assign(t.Name, value)
+	case ast.BlockStmt:
+		i.executeBlock(t.Statements, &Environment{
+			Enclosing: i.environment,
+			Values:    make(map[string]any),
+		})
+	case ast.IfStmt:
+		if isTruthy(i.evaluate(t.Condition)) {
+			i.execute(t.ThenBranch)
+		} else if t.ElseBranch != nil {
+			i.execute(t.ElseBranch)
+		}
 	default:
 		return
 	}
 }
 
+func (i *Interpreter) executeBlock(statements []ast.Stmt, environment *Environment) {
+	previous := i.environment
+	i.environment = environment
+	defer func() {
+		i.environment = previous
+	}()
+	for _, s := range statements {
+		i.execute(s)
+	}
+}
+
 func (i *Interpreter) evaluate(e ast.Expr) any {
-	fmt.Printf("Expr -> %T \n", e)
+	fmt.Println("--evaluate--")
 	switch t := e.(type) {
 	case ast.Ternary:
 		condition := i.evaluate(t.Condition)
@@ -104,8 +122,12 @@ func (i *Interpreter) evaluate(e ast.Expr) any {
 		}
 		return nil
 	case ast.Variable:
-		fmt.Printf("variable values -> %v \n", i.environment.Values)
 		return i.environment.Get(t.Name)
+	case ast.Assign:
+		fmt.Printf("assign -> %v \n", t)
+		value := i.evaluate(t.Value)
+		i.environment.Assign(t.Name, value)
+		return value
 	case ast.Binary:
 		left := i.evaluate(t.Left)
 		right := i.evaluate(t.Right)

@@ -46,6 +46,9 @@ func (p *Parser) varDeclaration() ast.Stmt {
 }
 
 func (p *Parser) statement() ast.Stmt {
+	if p.match(ast.IF) {
+		return p.ifStatement()
+	}
 	if p.match(ast.PRINT) {
 		return p.printStatement()
 	}
@@ -55,6 +58,23 @@ func (p *Parser) statement() ast.Stmt {
 		}
 	}
 	return p.expressionStatement()
+}
+
+func (p *Parser) ifStatement() ast.Stmt {
+	p.consume(ast.LEFT_PAREN, "Expect '(' after 'if'.")
+	condition := p.expression()
+	p.consume(ast.RIGHT_PAREN, "Expect ')' after if condition.")
+
+	thenBranch := p.statement()
+	var elseBranch ast.Stmt
+	if p.match(ast.ELSE) {
+		elseBranch = p.statement()
+	}
+	return ast.IfStmt{
+		Condition:  condition,
+		ElseBranch: elseBranch,
+		ThenBranch: thenBranch,
+	}
 }
 
 func (p *Parser) block() []ast.Stmt {
@@ -125,7 +145,7 @@ func (p *Parser) assignment() ast.Expr {
 	if p.match(ast.EQUAL) {
 		equals := p.previous()
 		value := p.assignment()
-		if eval, ok := value.(ast.Variable); ok {
+		if eval, ok := expr.(ast.Variable); ok {
 			name := eval.Name
 			return ast.Assign{
 				Name:  name,
@@ -142,7 +162,7 @@ func (p *Parser) conditional() ast.Expr {
 	if p.match(ast.QUESTION) {
 		thenBranch := p.assignment()
 		p.consume(ast.COLON, "Expect ':' after ternary condition")
-		elseBranch := p.conditional()
+		elseBranch := p.assignment()
 		return ast.Ternary{
 			Condition: expr,
 			Then:      thenBranch,
@@ -254,7 +274,6 @@ func (p *Parser) primary() ast.Expr {
 		return ast.Literal{Value: p.previous().Literal}
 	}
 	if p.match(ast.IDENTIFIER) {
-		fmt.Println("240 identifier -> %v", p.previous())
 		return ast.Variable{Name: p.previous()}
 	}
 	if p.match(ast.LEFT_PAREN) {
