@@ -46,17 +46,23 @@ func (p *Parser) varDeclaration() ast.Stmt {
 }
 
 func (p *Parser) statement() ast.Stmt {
-	if p.match(ast.FOR) {
-		return p.forStatement()
-	}
+
 	if p.match(ast.IF) {
 		return p.ifStatement()
 	}
 	if p.match(ast.PRINT) {
 		return p.printStatement()
 	}
+	if p.match(ast.FOR) {
+		return p.forStatement()
+	}
 	if p.match(ast.WHILE) {
 		return p.whileStatement()
+	}
+	if p.match(ast.BREAK) {
+		fmt.Printf("trying to check a break outside of the loop\n")
+		p.consume(ast.SEMICOLON, "Expect ';' after break declaration.")
+		p.error(p.previous(), "Break statement cannot be outside of loop")
 	}
 	if p.match(ast.LEFT_BRACE) {
 		return ast.BlockStmt{
@@ -66,6 +72,9 @@ func (p *Parser) statement() ast.Stmt {
 	return p.expressionStatement()
 }
 
+func (p *Parser) breakStatement() ast.Stmt {
+	return nil
+}
 func (p *Parser) forStatement() ast.Stmt {
 	p.consume(ast.LEFT_PAREN, "Expect '(', after 'for'.")
 	var initializer ast.Stmt

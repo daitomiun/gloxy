@@ -47,6 +47,7 @@ const (
 	OR
 	PRINT
 	RETURN
+	BREAK
 	SUPER
 	THIS
 	TRUE
@@ -68,6 +69,7 @@ var Keywords = map[string]TokenType{
 	"or":     OR,
 	"print":  PRINT,
 	"return": RETURN,
+	"break":  BREAK,
 	"super":  SUPER,
 	"this":   THIS,
 	"true":   TRUE,
